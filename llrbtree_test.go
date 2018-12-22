@@ -9,27 +9,66 @@ import (
 
 type mockTree string
 
-func (m mockTree) CompareTo(m1 interface{}) int {
+func (m mockTree) CompareTo(m1 Key) int {
 	return strings.Compare(string(m), string(m1.(mockTree)))
 }
 
-func TestPutAndGet(t *testing.T) {
+func TestTree(t *testing.T) {
 	tree := &LLRBTree{}
+
+	// remove unpresent key
+	tree.Remove(mockTree("1"))
+
+	// Put & Get
 	tree.Put(mockTree("1"), 1)
 	tree.Put(mockTree("2"), 2)
+	tree.Put(mockTree("6"), 6)
+	tree.Put(mockTree("7"), 7)
+	tree.Put(mockTree("8"), 8)
+	tree.Put(mockTree("9"), 9)
+	tree.Put(mockTree("3"), 3)
+	tree.Put(mockTree("4"), 4)
+
+	t.Log(tree.dotString())
+
 	v, ok := tree.Get(mockTree("1"))
 	assert.Equal(t, 1, v.(int))
 	assert.True(t, ok)
 
-	v, ok = tree.Get(mockTree("2"))
-	assert.Equal(t, 2, v.(int))
-	assert.True(t, ok)
-
-	_, ok = tree.Get(mockTree("3"))
+	// get unpresent key
+	_, ok = tree.Get(mockTree("_"))
 	assert.False(t, ok)
 
-	tree.Put(mockTree("2"), 4)
+	// update value
+	old := tree.Put(mockTree("2"), 4)
+	assert.Equal(t, 2, old.(int))
 	v, ok = tree.Get(mockTree("2"))
 	assert.Equal(t, 4, v.(int))
 	assert.True(t, ok)
+
+	// remove smallest
+	v = tree.Remove(mockTree("1"))
+	assert.Equal(t, 1, v.(int))
+	v, ok = tree.Get(mockTree("1"))
+	assert.False(t, ok)
+
+	tree.Put(mockTree("1"), 1)
+
+	// remove greatest
+	v = tree.Remove(mockTree("8"))
+	assert.Equal(t, 8, v.(int))
+	v, ok = tree.Get(mockTree("8"))
+	assert.False(t, ok)
+
+	tree.Put(mockTree("5"), 5)
+	tree.Put(mockTree("50"), 50)
+	tree.Put(mockTree("40"), 40)
+	tree.Put(mockTree("90"), 90)
+	t.Log(tree.dotString())
+
+	// remove key
+	v = tree.Remove(mockTree("2"))
+	assert.Equal(t, 4, v.(int))
+	v, ok = tree.Get(mockTree("2"))
+	assert.False(t, ok)
 }
