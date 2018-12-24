@@ -7,11 +7,7 @@ import (
 
 // dot related functions
 func dotNode(n *node) string {
-	c := "gray"
-	if isRed(n) {
-		c = "red"
-	}
-	return fmt.Sprintf(`%v [shape=circle,color=%s,label="%v:%v"];`, n.key, c, n.key, n.value)
+	return fmt.Sprintf(`%v [shape=circle,label="%v:%v"];`, n.key, n.key, n.value)
 }
 
 func dotNodes(n *node) string {
@@ -21,6 +17,13 @@ func dotNodes(n *node) string {
 	return dotNode(n) + dotNodes(n.left) + dotNodes(n.right)
 }
 
+func color(n *node) string {
+	if isRed(n) {
+		return "red"
+	}
+	return "black"
+}
+
 func dotEdges(n *node) string {
 	if n == nil {
 		return ""
@@ -28,10 +31,10 @@ func dotEdges(n *node) string {
 
 	s := ""
 	if n.left != nil {
-		s += fmt.Sprintf("%v->%v;", n.key, n.left.key)
+		s += fmt.Sprintf("%v->%v[color=%s];", n.key, n.left.key, color(n.left))
 	}
 	if n.right != nil {
-		s += fmt.Sprintf("%v->%v;", n.key, n.right.key)
+		s += fmt.Sprintf("%v->%v[color=%s];", n.key, n.right.key, color(n.right))
 	}
 
 	s += dotEdges(n.left)

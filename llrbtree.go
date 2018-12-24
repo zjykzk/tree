@@ -25,6 +25,7 @@ type Key interface {
 // LLRBTree the red-black tree. The algorithms are adaptations of those in
 // http://www.cs.princeton.edu/~rs/talks/LLRB/LLRB.pdf
 type LLRBTree struct {
+	size int
 	root *node
 }
 
@@ -48,8 +49,14 @@ func (t *LLRBTree) Get(k Key) (v interface{}, ok bool) {
 // Put associates the specified value with the specified key in this tree.
 // If the tree previously contained a mapping for the key, the old value is replaced.
 func (t *LLRBTree) Put(k Key, v interface{}) (old interface{}) {
-	t.root, old = insert(t.root, k, v)
+	var exist bool
+
+	t.root, old, exist = insert(t.root, k, v)
 	t.root.color = black
+
+	if !exist {
+		t.size++
+	}
 	return
 }
 
@@ -62,7 +69,48 @@ func (t *LLRBTree) Remove(k Key) (v interface{}) {
 
 	t.root = remove(t.root, k)
 	t.root.color = black
+	t.size--
 	return v
+}
+
+// First returns the first key and value(according to the key sort)
+func (t *LLRBTree) First() (k Key, v interface{}) {
+	n := t.root
+	if n == nil {
+		return
+	}
+
+	for n.left != nil {
+		n = n.left
+	}
+
+	k, v = n.key, n.value
+	return
+}
+
+// Last returns the last key and value(according to the key sort)
+func (t *LLRBTree) Last() (k Key, v interface{}) {
+	n := t.root
+	if n == nil {
+		return
+	}
+
+	for n.right != nil {
+		n = n.right
+	}
+
+	k, v = n.key, n.value
+	return
+}
+
+// Size returns the number of key-value mapping in this tree
+func (t *LLRBTree) Size() int {
+	return t.size
+}
+
+// Clear removes all of the mappings from the tree.
+func (t *LLRBTree) Clear() {
+	t.root = nil
 }
 
 const (
@@ -107,18 +155,18 @@ func isRed(n *node) bool {
 	return n != nil && n.color == red
 }
 
-func insert(n *node, k Key, v interface{}) (h *node, old interface{}) {
+func insert(n *node, k Key, v interface{}) (h *node, old interface{}, exist bool) {
 	if n == nil {
-		return &node{key: k, value: v, color: red}, nil
+		return &node{key: k, value: v, color: red}, nil, false
 	}
 
 	switch cmp := k.CompareTo(n.key); {
 	case cmp == 0:
-		old, n.value = n.value, v
+		old, n.value, exist = n.value, v, true
 	case cmp > 0:
-		n.right, old = insert(n.right, k, v)
+		n.right, old, exist = insert(n.right, k, v)
 	default:
-		n.left, old = insert(n.left, k, v)
+		n.left, old, exist = insert(n.left, k, v)
 	}
 
 	h = fixUp(n)
