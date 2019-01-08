@@ -111,6 +111,36 @@ func (t *LLRBTree) Size() int {
 // Clear removes all of the mappings from the tree.
 func (t *LLRBTree) Clear() {
 	t.root = nil
+	t.size = 0
+}
+
+// PutAll puts the maps from the specifity tree
+func (t *LLRBTree) PutAll(s *LLRBTree) {
+	if s == nil || s.root == nil {
+		return
+	}
+
+	queue := make([]*node, s.size)
+	queue[0] = s.root
+	d, e := 0, 0
+	for {
+		n := queue[d]
+
+		t.Put(n.key, n.value)
+		if n.left != nil {
+			e++
+			queue[e] = n.left
+		}
+		if n.right != nil {
+			e++
+			queue[e] = n.right
+		}
+
+		d++
+		if d == s.size {
+			break
+		}
+	}
 }
 
 const (

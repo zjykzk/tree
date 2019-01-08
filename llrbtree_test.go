@@ -1,6 +1,7 @@
 package tree
 
 import (
+	"strconv"
 	"strings"
 	"testing"
 
@@ -87,4 +88,54 @@ func TestTree(t *testing.T) {
 
 	t.Log(graph)
 	printGraph(graph)
+}
+
+func TestPutAll(t *testing.T) {
+	tree := &LLRBTree{}
+
+	// Put & Get
+	tree.Put(mockTree("1"), 1)
+	tree.Put(mockTree("2"), 2)
+	tree.Put(mockTree("6"), 6)
+	tree.Put(mockTree("7"), 7)
+	tree.Put(mockTree("8"), 8)
+	tree.Put(mockTree("9"), 9)
+	tree.Put(mockTree("3"), 3)
+	tree.Put(mockTree("4"), 4)
+
+	newTree := &LLRBTree{}
+	newTree.PutAll(tree)
+
+	checkerTrue := func(i int) {
+		v, ok := newTree.Get(mockTree(strconv.Itoa(i)))
+		assert.True(t, ok)
+		assert.Equal(t, i, v.(int))
+	}
+	checkerTrue(1)
+	checkerTrue(2)
+	checkerTrue(3)
+	checkerTrue(4)
+	checkerTrue(6)
+	checkerTrue(7)
+	checkerTrue(8)
+	checkerTrue(9)
+
+	checkerFalse := func(i int) {
+		_, ok := newTree.Get(mockTree(strconv.Itoa(i)))
+		assert.False(t, ok)
+	}
+	checkerFalse(5)
+
+	g := newTree.nodeAndEdges() + tree.nodeAndEdges()
+
+	tree.Clear()
+	tree.Put(mockTree("20"), 20)
+	newTree.PutAll(tree)
+	checkerTrue(20)
+	g += newTree.nodeAndEdges()
+
+	tree.Clear()
+	newTree.PutAll(tree)
+
+	printGraph(g)
 }
