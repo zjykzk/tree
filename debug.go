@@ -2,12 +2,19 @@ package tree
 
 import (
 	"fmt"
+	"os"
 	"strings"
 )
 
+var nameSufix = 1
+
+func dotName(n *node) string {
+	return fmt.Sprintf("no_%v%d", n.key, nameSufix)
+}
+
 // dot related functions
 func dotNode(n *node) string {
-	return fmt.Sprintf(`%v [shape=circle,label="%v:%v"];`, n.key, n.key, n.value)
+	return fmt.Sprintf(`%v [shape=circle,label="%v:%v"];`, dotName(n), n.key, n.value)
 }
 
 func dotNodes(n *node) string {
@@ -31,10 +38,10 @@ func dotEdges(n *node) string {
 
 	s := ""
 	if n.left != nil {
-		s += fmt.Sprintf("%v->%v[color=%s];", n.key, n.left.key, color(n.left))
+		s += fmt.Sprintf("%v->%v[color=%s];", dotName(n), dotName(n.left), color(n.left))
 	}
 	if n.right != nil {
-		s += fmt.Sprintf("%v->%v[color=%s];", n.key, n.right.key, color(n.right))
+		s += fmt.Sprintf("%v->%v[color=%s];", dotName(n), dotName(n.right), color(n.right))
 	}
 
 	s += dotEdges(n.left)
@@ -42,13 +49,23 @@ func dotEdges(n *node) string {
 	return s
 }
 
-func (t *LLRBTree) dotString() string {
+func (t *LLRBTree) nodeAndEdges() string {
 	b := &strings.Builder{}
 
-	b.WriteString(`digraph G {`)
 	b.WriteString(dotNodes(t.root))
 	b.WriteString(dotEdges(t.root))
-	b.WriteByte('}')
+
+	nameSufix++
 
 	return b.String()
+}
+
+func printGraph(s string) {
+	f, err := os.Create("dot.dot")
+	if err != nil {
+		fmt.Printf("print graph error:%s\n", err)
+		return
+	}
+	f.WriteString(fmt.Sprintf("digraph G{%s}\n", s))
+	f.Close()
 }

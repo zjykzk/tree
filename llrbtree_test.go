@@ -30,7 +30,8 @@ func TestTree(t *testing.T) {
 	tree.Put(mockTree("4"), 4)
 	assert.Equal(t, 8, tree.Size())
 
-	t.Log(tree.dotString())
+	graph := ""
+	graph += tree.nodeAndEdges()
 
 	v, ok := tree.Get(mockTree("1"))
 	assert.Equal(t, 1, v.(int))
@@ -52,7 +53,7 @@ func TestTree(t *testing.T) {
 	assert.Equal(t, 1, v.(int))
 	v, ok = tree.Get(mockTree("1"))
 	assert.False(t, ok)
-	t.Log(tree.dotString())
+	graph += tree.nodeAndEdges()
 	assert.Equal(t, 7, tree.Size())
 
 	tree.Put(mockTree("1"), 1)
@@ -74,7 +75,7 @@ func TestTree(t *testing.T) {
 	v, ok = tree.Get(mockTree("2"))
 	assert.False(t, ok)
 
-	t.Log(tree.dotString())
+	graph += tree.nodeAndEdges()
 	// first
 	k, v := tree.First()
 	assert.Equal(t, mockTree("1"), k.(mockTree))
@@ -83,4 +84,7 @@ func TestTree(t *testing.T) {
 	k, v = tree.Last()
 	assert.Equal(t, mockTree("90"), k.(mockTree))
 	assert.Equal(t, 90, v.(int))
+
+	t.Log(graph)
+	printGraph(graph)
 }
